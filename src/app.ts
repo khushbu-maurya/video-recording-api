@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import UserRouter from "./routes/UserRouter"
 import swaggerUi from "swagger-ui-express";
 import swaggerApiDocs from "./swagger-api.json";
+import cors from "cors";
 import path from "path";
 dotenv.config();
 const app=express();
@@ -11,6 +12,10 @@ const app=express();
 const port=process.env.PORT||3002;
 const dburl=process.env.DBURL as any
 const staticPath=path.join(__dirname,"./public")
+
+app.use(cors({
+    origin: '*'
+}));
 app.use(express.static(staticPath));
 app.use(express.json());
 app.use('/api/user',UserRouter);
