@@ -11,11 +11,10 @@ import sgMail from '@sendgrid/mail';
 import nodemailerSendgrid from 'nodemailer-sendgrid';
 export const UserReg = async (req: Request<any, any, IUserReg>, res: Response) => {
     try {
-        const password = req.body.password;
-        const HashPassword = await hash(password, 10)
+       
         await new User({
             email: req.body.email,
-            password: HashPassword,
+            password: req.body.password,
             uname: req.body.uname
         }).save();
         res.status(200).send({
@@ -37,16 +36,17 @@ export const UserLogin = async (req: Request, res: Response) => {
                 message: "User not found !"
             })
         }
-        const isCompare = await compare(password, UserData.password);
-        const UserToken = await sign({ id: UserData._id }, process.env.JWT_KEY_USER as string, { expiresIn: "10h" });
-        if (!isCompare) {
+       
+       
+        if (UserData.password!==password) {
             return res.status(400).send({
                 message: "Invalide username or password"
             })
         }
-        if (isCompare) {
+        if (UserData.password==password) {
+            const UserToken = await sign({ id: UserData._id }, process.env.JWT_KEY_USER as string, { expiresIn: "10h" });
             return res.status(200).send({
-                message: "User Login Success !!",
+                message: "Admin Login Success !!",
                 token: UserToken
             })
         }
@@ -89,7 +89,7 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
 
             await transporter.sendMail({
                 from: "emailtest8956@gmail.com",
-                to: "khushbum.wa@gmail.com",
+                to: email,
                 subject: "Admin Invite You To Join Link",
                 html: `<b>${User.uname} Invite To join video create page, click on link to join</b><br>
                        <b >Title :${title}</b> <br>
