@@ -1,0 +1,83 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "NodeTask",
+      "version": "1.0.0",
+      "description": ""
+    },
+    "servers":[
+        {
+            "url":"http://localhost:4002/api"
+        }
+    ],
+    "components":{
+      "securitySchemes":{
+        "JWT":{
+            "type":"apiKey",
+            "in":"header",
+            "name":"AuthToken"
+        }
+      }
+    },
+    "paths": {
+        "/user/login": {
+          "post": {
+            "tags":[
+                "User"
+            ],
+            "summary":"User login",
+            "description": "User login",
+            "parameters": [],
+            "responses": {},
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "example": "string"
+                      },
+                      "password": {
+                        "example": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/user/register": {
+            "post": {
+              "tags":[
+                  "User"
+              ],
+              "summary":"User Reg",
+              "description": "User Reg",
+              "parameters": [],
+              "responses": {},
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "example": "string"
+                        },
+                        "password": {
+                          "example": "string"
+                        },
+                        "uname":{
+                            "example":"string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+    }
+}
