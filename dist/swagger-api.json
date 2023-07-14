@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:4002/api"
+            "url": "https://video-recording.onrender.com/api"
         }
     ],
     "components": {
