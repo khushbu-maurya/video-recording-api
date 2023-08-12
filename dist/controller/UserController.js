@@ -77,11 +77,6 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const link = req.body.link;
         const User = req.user;
         const logo = (_a = req.file) === null || _a === void 0 ? void 0 : _a.filename;
-        if (!logo) {
-            return res.status(400).send({
-                message: "pls add logo file"
-            });
-        }
         // console.log(User);
         if (!email && !title) {
             return res.status(400).send({
@@ -304,7 +299,7 @@ const getlogo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 message: "User Not Found"
             });
         }
-        return res.status(400).send({
+        return res.status(200).send({
             message: "Link user fetch ",
             logo: `${process.env.client_url}/` + linkuser.logo
         });

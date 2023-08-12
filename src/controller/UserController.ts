@@ -65,11 +65,7 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
         const link = req.body.link;
         const User = req.user;
         const logo=req.file?.filename;
-        if(!logo){
-            return res.status(400).send({
-                message:"pls add logo file"
-            })
-        }
+    
         // console.log(User);
         if (!email && !title) {
             return res.status(400).send({
@@ -292,7 +288,7 @@ export const getlogo=async(req:Request,res:Response)=>{
             message:"User Not Found"
         })
        }
-       return res.status(400).send({
+       return res.status(200).send({
         message:"Link user fetch ",
         logo:`${process.env.client_url}/`+linkuser.logo
     })
