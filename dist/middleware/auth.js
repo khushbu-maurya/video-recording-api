@@ -41,3 +41,4 @@ const userAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.userAuth = userAuth;
+// consolve.log

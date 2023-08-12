@@ -28,6 +28,7 @@ const LinkSchema = new mongoose_1.Schema({
     email: String,
     tittle: String,
     link: String,
+    logo: String,
     user: mongoose_1.default.Types.ObjectId
 }, {
     timestamps: true

@@ -123,7 +123,7 @@ export const UploadFile = async (req: Request<any, any, IFileUpload>, res: Respo
         }
         return res.status(200).send({
             message: "video Upload Success !",
-            file: `${process.env.client_url}/upload/${req.file?.filename}`
+            file: `${process.env.client_url}/${req.file?.filename}`
         })
 
     } catch (error) {
@@ -207,12 +207,12 @@ export const GetFile = async (req: Request, res: Response) => {
                     _id: "$_id",
                     email: "$linkDetail.email",
                     file:  {
-                        $concat: [`${process.env.client_url}/upload/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                        $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
                     },
                     linkid: "$linkid",
                     title: "$linkDetail.title",
                     logo:{
-                        $concat: [`${process.env.client_url}/logo/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
+                        $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
                     },
                     createdAt: "$createdAt",
                     updatedAt: "$updatedAt",
@@ -248,12 +248,12 @@ export const GetFile = async (req: Request, res: Response) => {
                         _id: "$_id",
                         email: "$linkDetail.email",
                         file: {
-                            $concat: [`${process.env.client_url}/upload/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                            $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
                         },
                         linkid: "$linkid",
                         title: "$linkDetail.title",
                         logo:{
-                            $concat: [`${process.env.client_url}/logo/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
+                            $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
                         },
                         createdAt: "$createdAt",
                         updatedAt: "$updatedAt",
@@ -294,7 +294,7 @@ export const getlogo=async(req:Request,res:Response)=>{
        }
        return res.status(400).send({
         message:"Link user fetch ",
-        logo:`${process.env.client_url}/logo/`+linkuser.logo
+        logo:`${process.env.client_url}/`+linkuser.logo
     })
        
        } catch (error) {

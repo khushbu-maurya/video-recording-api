@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.test = exports.GetFile = exports.sendEmail = exports.UploadFile = exports.GenerateLink = exports.UserLogin = exports.UserReg = void 0;
+exports.getlogo = exports.test = exports.GetFile = exports.sendEmail = exports.UploadFile = exports.GenerateLink = exports.UserLogin = exports.UserReg = void 0;
 const UserModel_1 = __importDefault(require("../model/UserModel"));
 const jsonwebtoken_1 = require("jsonwebtoken");
 const FileUpload_1 = __importDefault(require("../model/FileUpload"));
@@ -70,11 +70,18 @@ const UserLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.UserLogin = UserLogin;
 const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const email = req.body.email;
         const title = req.body.title;
         const link = req.body.link;
         const User = req.user;
+        const logo = (_a = req.file) === null || _a === void 0 ? void 0 : _a.filename;
+        if (!logo) {
+            return res.status(400).send({
+                message: "pls add logo file"
+            });
+        }
         // console.log(User);
         if (!email && !title) {
             return res.status(400).send({
@@ -85,7 +92,8 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             email: email,
             title: title,
             link: link,
-            admin: User
+            admin: User,
+            logo: logo
         }).save();
         var GenerateLink = yield `${link}:${LinkUser._id}`;
         const UpdateLink = yield LinkModel_1.default.findByIdAndUpdate(LinkUser._id, { link: GenerateLink }); // store ulr database
@@ -107,7 +115,8 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.GenerateLink = GenerateLink;
 const UploadFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _b, _c;
+    //   console.log(req.params.id);
     try {
         if (!req.file) {
             return res.status(400).send({
@@ -117,7 +126,7 @@ const UploadFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         //   const CheckUser= await File.findById(req.params.id);
         // console.log(req.file)
         const FileUplodSucc = yield new FileUpload_1.default({
-            file: (_a = req.file) === null || _a === void 0 ? void 0 : _a.filename,
+            file: (_b = req.file) === null || _b === void 0 ? void 0 : _b.filename,
             linkid: req.params.id,
         }).save();
         // console.log(FileUplodSucc)                   
@@ -128,7 +137,7 @@ const UploadFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         return res.status(200).send({
             message: "video Upload Success !",
-            file: `http://localhost:4002/upload/${(_b = req.file) === null || _b === void 0 ? void 0 : _b.filename}`
+            file: `${process.env.client_url}/${(_c = req.file) === null || _c === void 0 ? void 0 : _c.filename}`
         });
     }
     catch (error) {
@@ -209,10 +218,13 @@ const GetFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         _id: "$_id",
                         email: "$linkDetail.email",
                         file: {
-                            $concat: ["http://localhost:4002/upload/", { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                            $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
                         },
                         linkid: "$linkid",
                         title: "$linkDetail.title",
+                        logo: {
+                            $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
+                        },
                         createdAt: "$createdAt",
                         updatedAt: "$updatedAt",
                     }
@@ -247,10 +259,13 @@ const GetFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         _id: "$_id",
                         email: "$linkDetail.email",
                         file: {
-                            $concat: ["http://localhost:4002/upload/", { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                            $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
                         },
                         linkid: "$linkid",
                         title: "$linkDetail.title",
+                        logo: {
+                            $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
+                        },
                         createdAt: "$createdAt",
                         updatedAt: "$updatedAt",
                     }
@@ -280,3 +295,22 @@ const test = (req, res) => {
     res.send("test success");
 };
 exports.test = test;
+const getlogo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const linkid = req.params.id;
+    try {
+        const linkuser = yield LinkModel_1.default.findById(linkid);
+        if (!linkuser) {
+            return res.status(400).send({
+                message: "User Not Found"
+            });
+        }
+        return res.status(400).send({
+            message: "Link user fetch ",
+            logo: `${process.env.client_url}/` + linkuser.logo
+        });
+    }
+    catch (error) {
+        console.log("Error:Usercontroller:getlogo", error);
+    }
+});
+exports.getlogo = getlogo;
