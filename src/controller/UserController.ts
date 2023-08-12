@@ -64,6 +64,12 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
         const title = req.body.title;
         const link = req.body.link;
         const User = req.user;
+        const logo=req.file?.filename;
+        if(!logo){
+            return res.status(400).send({
+                message:"pls add logo file"
+            })
+        }
         // console.log(User);
         if (!email && !title) {
             return res.status(400).send({
@@ -74,7 +80,8 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
             email: email,
             title: title,
             link: link,
-            admin: User
+            admin: User,
+            logo:logo
         }).save();
         var GenerateLink: any = await `${link}:${LinkUser._id}`;
         const UpdateLink = await Link.findByIdAndUpdate(LinkUser._id, { link: GenerateLink }) // store ulr database
@@ -95,7 +102,7 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
     }
 }
 export const UploadFile = async (req: Request<any, any, IFileUpload>, res: Response) => {
-
+//   console.log(req.params.id);
     try {
         if (!req.file) {
             return res.status(400).send({
@@ -116,7 +123,7 @@ export const UploadFile = async (req: Request<any, any, IFileUpload>, res: Respo
         }
         return res.status(200).send({
             message: "video Upload Success !",
-            file: `http://localhost:4002/upload/${req.file?.filename}`
+            file: `${process.env.client_url}/upload/${req.file?.filename}`
         })
 
     } catch (error) {
@@ -200,10 +207,13 @@ export const GetFile = async (req: Request, res: Response) => {
                     _id: "$_id",
                     email: "$linkDetail.email",
                     file:  {
-                        $concat: ["http://localhost:4002/upload/", { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                        $concat: [`${process.env.client_url}/upload/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
                     },
                     linkid: "$linkid",
                     title: "$linkDetail.title",
+                    logo:{
+                        $concat: [`${process.env.client_url}/logo/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
+                    },
                     createdAt: "$createdAt",
                     updatedAt: "$updatedAt",
                 }
@@ -238,10 +248,13 @@ export const GetFile = async (req: Request, res: Response) => {
                         _id: "$_id",
                         email: "$linkDetail.email",
                         file: {
-                            $concat: ["http://localhost:4002/upload/", { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                            $concat: [`${process.env.client_url}/upload/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
                         },
                         linkid: "$linkid",
                         title: "$linkDetail.title",
+                        logo:{
+                            $concat: [`${process.env.client_url}/logo/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
+                        },
                         createdAt: "$createdAt",
                         updatedAt: "$updatedAt",
                     }

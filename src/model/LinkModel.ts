@@ -4,6 +4,7 @@ const LinkSchema = new Schema({
     email: String,
     tittle:String,
     link:String,
+    logo:String,
     user:mongoose.Types.ObjectId
 
 }, {
