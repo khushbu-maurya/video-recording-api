@@ -283,3 +283,21 @@ export const GetFile = async (req: Request, res: Response) => {
 export const test = (req: Request, res: Response) => {
     res.send("test success");
 }
+export const getlogo=async(req:Request,res:Response)=>{
+    const linkid=req.params.id
+       try {
+       const linkuser= await Link.findById(linkid);
+       if(!linkuser){
+        return res.status(400).send({
+            message:"User Not Found"
+        })
+       }
+       return res.status(400).send({
+        message:"Link user fetch ",
+        logo:`${process.env.client_url}/logo/`+linkuser.logo
+    })
+       
+       } catch (error) {
+        console.log("Error:Usercontroller:getlogo",error);
+       }
+}
