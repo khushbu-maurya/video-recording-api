@@ -12,20 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetFile = exports.UploadFile = exports.GenerateLink = exports.UserLogin = exports.UserReg = void 0;
+exports.test = exports.GetFile = exports.sendEmail = exports.UploadFile = exports.GenerateLink = exports.UserLogin = exports.UserReg = void 0;
 const UserModel_1 = __importDefault(require("../model/UserModel"));
-const bcryptjs_1 = require("bcryptjs");
 const jsonwebtoken_1 = require("jsonwebtoken");
 const FileUpload_1 = __importDefault(require("../model/FileUpload"));
 const LinkModel_1 = __importDefault(require("../model/LinkModel"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const validator_1 = __importDefault(require("validator"));
 const UserReg = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const password = req.body.password;
-        const HashPassword = yield (0, bcryptjs_1.hash)(password, 10);
         yield new UserModel_1.default({
             email: req.body.email,
-            password: HashPassword,
+            password: req.body.password,
             uname: req.body.uname
         }).save();
         res.status(200).send({
@@ -42,22 +41,22 @@ const UserLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let email = req.body.email;
         let password = req.body.password;
-        const UserData = yield UserModel_1.default.findOne({ email });
+        let UserData = yield UserModel_1.default.findOne({ email });
+        // return res.send(UserData.password)
         if (!UserData) {
             return res.status(400).send({
                 message: "User not found !"
             });
         }
-        const isCompare = yield (0, bcryptjs_1.compare)(password, UserData.password);
-        const UserToken = yield (0, jsonwebtoken_1.sign)({ id: UserData._id }, process.env.JWT_KEY_USER, { expiresIn: "10h" });
-        if (!isCompare) {
+        if (UserData.password !== password) {
             return res.status(400).send({
                 message: "Invalide username or password"
             });
         }
-        if (isCompare) {
+        if (UserData.password == password) {
+            const UserToken = yield (0, jsonwebtoken_1.sign)({ id: UserData._id }, process.env.JWT_KEY_USER);
             return res.status(200).send({
-                message: "User Login Success !!",
+                message: "Admin Login Success !!",
                 token: UserToken
             });
         }
@@ -74,7 +73,7 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     try {
         const email = req.body.email;
         const title = req.body.title;
-        const link = req.token;
+        const link = req.body.link;
         const User = req.user;
         // console.log(User);
         if (!email && !title) {
@@ -83,65 +82,53 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             });
         }
         const LinkUser = yield new LinkModel_1.default({
-            email: req.body.email,
-            title: req.body.title,
+            email: email,
+            title: title,
             link: link,
-            user: User
-        });
-        if (LinkUser) {
-            const transporter = nodemailer_1.default.createTransport({
-                service: "Gmail",
-                auth: {
-                    user: "emailtest8956@gmail.com",
-                    pass: "psvrcjdawruxxpew",
-                }
-            });
-            yield transporter.sendMail({
-                from: "emailtest8956@gmail.com",
-                to: "khushbum.wa@gmail.com",
-                subject: "Admin Invite You To Join Link",
-                html: `<b>${User.uname} Invite To join video create page, click on link to join</b><br>
-                       <b >Title :${title}</b> <br>
-                        <a href="https://www.google.com/"> ${link}</a>`
-            }).then((result => {
-                console.log("Email Send success");
-            })).catch(error => {
-                console.log('Email send error', error);
-                return res.status(400).send({
-                    status: "failed",
-                    message: "cant send email !!"
-                });
-            });
-        }
+            admin: User
+        }).save();
+        var GenerateLink = yield `${link}:${LinkUser._id}`;
+        const UpdateLink = yield LinkModel_1.default.findByIdAndUpdate(LinkUser._id, { link: GenerateLink }); // store ulr database
         return res.status(200).send({
-            status: "success",
-            link: link
+            status: "User Link success",
+            email: LinkUser.email,
+            title: LinkUser.title,
+            link: GenerateLink,
+            linkid: LinkUser._id,
         });
     }
     catch (error) {
         console.log("Error :UserController :GenerateLink", error);
+        return res.status(400).send({
+            status: "failed",
+            message: "cant send email !!"
+        });
     }
 });
 exports.GenerateLink = GenerateLink;
 const UploadFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
-        if (!req.file && !req.body.email) {
+        if (!req.file) {
             return res.status(400).send({
-                message: "Pls Enter valide Data !"
+                message: "video not found !"
             });
         }
-        // console.log(req.file?.filename)
+        //   const CheckUser= await File.findById(req.params.id);
+        // console.log(req.file)
         const FileUplodSucc = yield new FileUpload_1.default({
-            email: req.body.email,
-            file: req.file
-        }); // *Not Save
+            file: (_a = req.file) === null || _a === void 0 ? void 0 : _a.filename,
+            linkid: req.params.id,
+        }).save();
+        // console.log(FileUplodSucc)                   
         if (!FileUplodSucc) {
             return res.status(400).send({
-                message: "File Upload Error !"
+                message: "video Upload Error !"
             });
         }
         return res.status(200).send({
-            message: "File Upload Success !"
+            message: "video Upload Success !",
+            file: `http://localhost:4002/upload/${(_b = req.file) === null || _b === void 0 ? void 0 : _b.filename}`
         });
     }
     catch (error) {
@@ -149,6 +136,147 @@ const UploadFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.UploadFile = UploadFile;
-const GetFile = () => __awaiter(void 0, void 0, void 0, function* () {
+const sendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const admin = req.user;
+        const id = req.params.id;
+        const linkUser = yield LinkModel_1.default.findById(id);
+        const isValidEmail = validator_1.default.isEmail((linkUser === null || linkUser === void 0 ? void 0 : linkUser.email) || '');
+        if (!isValidEmail) {
+            // console.log('Invalid email address:', linkUser?.email);
+            return res.status(400).send({
+                status: 'failed',
+                message: 'Invalid email address!',
+            });
+        }
+        // console.log(isValidEmail)
+        const transporter = nodemailer_1.default.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: 'emailtest8956@gmail.com',
+                pass: 'psvrcjdawruxxpew',
+            },
+        });
+        const emailResult = yield transporter.sendMail({
+            from: 'emailtest8956@gmail.com',
+            to: linkUser === null || linkUser === void 0 ? void 0 : linkUser.email,
+            subject: 'Admin Invite You To Join Link',
+            html: `<b>${admin.uname} invites you to join the video create page. Click on the link to join</b><br>
+            <b>Title: ${linkUser === null || linkUser === void 0 ? void 0 : linkUser.title}</b> <br>
+            <a href="${linkUser === null || linkUser === void 0 ? void 0 : linkUser.link}">${linkUser === null || linkUser === void 0 ? void 0 : linkUser.link} </a>`,
+        });
+        // console.log('Email Sent Successfully', emailResult);
+        // Check if there are any rejected emails
+        if (emailResult.rejected && emailResult.rejected.length > 0) {
+            // console.log('Address not found:', emailResult.rejected);
+            return res.status(400).send({
+                status: 'failed',
+                message: 'Address not found!',
+            });
+        }
+        return res.status(200).send({
+            message: 'Email Sent Successfully!',
+        });
+    }
+    catch (error) {
+        console.log('Error: UserController: email send error:', error);
+        return res.status(400).send({
+            status: 'failed',
+            message: 'Failed to send email!',
+        });
+    }
+});
+exports.sendEmail = sendEmail;
+const GetFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const linkid = (req.query.id);
+        //  console.log(  await File.find())
+        if (linkid) {
+            const AllFileData = ((yield FileUpload_1.default.aggregate([{ $match: { linkid: new mongoose_1.default.Types.ObjectId(linkid) } },
+                {
+                    $lookup: {
+                        from: "links",
+                        localField: "linkid",
+                        foreignField: "_id",
+                        as: "linkDetail"
+                    }
+                },
+                {
+                    $unwind: "$linkDetail"
+                },
+                {
+                    $project: {
+                        _id: "$_id",
+                        email: "$linkDetail.email",
+                        file: {
+                            $concat: ["http://localhost:4002/upload/", { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                        },
+                        linkid: "$linkid",
+                        title: "$linkDetail.title",
+                        createdAt: "$createdAt",
+                        updatedAt: "$updatedAt",
+                    }
+                }
+            ])));
+            // console.log(AllFileData)
+            if (AllFileData.length <= 0) {
+                return res.status(400).send({
+                    message: "User Not Found !"
+                });
+            }
+            return res.status(200).send({
+                message: 'Link user fetch success',
+                LinkUser: AllFileData
+            });
+        }
+        else {
+            const ifNotID = ((yield FileUpload_1.default.aggregate([
+                {
+                    $lookup: {
+                        from: "links",
+                        localField: "linkid",
+                        foreignField: "_id",
+                        as: "linkDetail"
+                    }
+                },
+                {
+                    $unwind: "$linkDetail"
+                },
+                {
+                    $project: {
+                        _id: "$_id",
+                        email: "$linkDetail.email",
+                        file: {
+                            $concat: ["http://localhost:4002/upload/", { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                        },
+                        linkid: "$linkid",
+                        title: "$linkDetail.title",
+                        createdAt: "$createdAt",
+                        updatedAt: "$updatedAt",
+                    }
+                }
+            ])));
+            // console.log(ifNotID)
+            if (ifNotID.length <= 0) {
+                return res.status(400).send({
+                    message: "User Not Found !"
+                });
+            }
+            return res.status(200).send({
+                message: 'Link users fetch success',
+                LinkUser: ifNotID
+            });
+        }
+    }
+    catch (error) {
+        console.log("Error:UserController :GetFile", error);
+        return res.status(400).send({
+            message: "User Not Found !"
+        });
+    }
 });
 exports.GetFile = GetFile;
+const test = (req, res) => {
+    res.send("test success");
+};
+exports.test = test;

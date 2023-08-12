@@ -12,7 +12,7 @@ declare global {
     }
   }
 export const userAuth = async (req:Request<IUserReg>, res: Response, next: NextFunction) => {
-    const Token: any = req.header("authToken");
+    const Token: any = req.header("Authorization");
     try {
         const isVerify = await verify(Token, process.env.JWT_KEY_USER as any) as JwtPayload;
         if (isVerify) {
@@ -35,3 +35,5 @@ export const userAuth = async (req:Request<IUserReg>, res: Response, next: NextF
         })
     }
 };
+
+// consolve.log

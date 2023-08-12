@@ -32,14 +32,42 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const UserRouter_1 = __importDefault(require("./routes/UserRouter"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swagger_api_json_1 = __importDefault(require("./swagger-api.json"));
+const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
+const body_parser_1 = __importDefault(require("body-parser"));
 dotenv.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3002;
-const dburl = process.env.DBURL;
+const dburl = "mongodb+srv://khushbu:yQH2D98k1FLyN9Uq@cluster0.gnaux.mongodb.net/test";
+app.use(function (req, res, next) {
+    // res.setHeader("Set-Cookie", "HttpOnly;Secure;SameSite=None");
+    // res.setHeader('Access-Control-Allow-Origin', '*');
+    // res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    // res.setHeader('Access-Control-Allow-Credentials', "true");
+    // res.setHeader('Access-Control-Allow-Methods','POST, GET, PUT, PATCH')
+    // res.header("Access-control-Allow-Origin","*");
+    // res.header("Access-Control-Allow-Headers",'Origin, X-Requested-With, Content-Type, Accept');
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+    res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
+    next();
+});
+const corsOpts = {
+    credentials: true,
+    origin: '*',
+    methods: [
+        'GET',
+        'POST',
+        'PUT',
+        'PATCH'
+    ],
+};
+app.use((0, cors_1.default)(corsOpts));
 const staticPath = path_1.default.join(__dirname, "./public");
 app.use(express_1.default.static(staticPath));
 app.use(express_1.default.json());
+app.use(body_parser_1.default.urlencoded({ extended: false }));
 app.use('/api/user', UserRouter_1.default);
 app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_api_json_1.default));
 mongoose_1.default.connect(dburl).then(() => {

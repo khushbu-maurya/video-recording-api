@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "https://video-recording.onrender.com/api"
+            "url": " http://localhost:4002/api"
         }
     ],
     "components": {
@@ -23,10 +23,10 @@
         "/user/login": {
             "post": {
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
-                "summary": "User login",
-                "description": "User login",
+                "summary": "Admin login",
+                "description": "Admin login",
                 "parameters": [],
                 "responses": {},
                 "requestBody": {
@@ -51,10 +51,10 @@
         "/user/register": {
             "post": {
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
-                "summary": "User Reg",
-                "description": "User Reg",
+                "summary": "Admin Reg",
+                "description": "Admin Reg",
                 "parameters": [],
                 "responses": {},
                 "requestBody": {
@@ -77,6 +77,96 @@
                         }
                     }
                 }
+            }
+        },
+        "/user/generatelink": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Generate link",
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Generate link",
+                "parameters": [],
+                "responses": {},
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "example": "string"
+                                    },
+                                    "tittle": {
+                                        "example": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/upload/{LinkId}": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Upload File/Image",
+                "description": "upload File",
+                "parameters": [
+                    {
+                        "name": "LinkId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {}
+            }
+        },
+        "/user/getfile": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Link User",
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get Link User By linkID",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
             }
         }
     }

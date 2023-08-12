@@ -6,5 +6,6 @@ export type IUserReg={
 }
 export type IGenerateLink={
     email:string,
-    title:string
+    title:string,
+    link:any
 }

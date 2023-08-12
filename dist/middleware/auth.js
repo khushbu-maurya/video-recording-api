@@ -16,7 +16,7 @@ exports.userAuth = void 0;
 const jsonwebtoken_1 = require("jsonwebtoken");
 const UserModel_1 = __importDefault(require("../model/UserModel"));
 const userAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const Token = req.header("authToken");
+    const Token = req.header("Authorization");
     try {
         const isVerify = yield (0, jsonwebtoken_1.verify)(Token, process.env.JWT_KEY_USER);
         if (isVerify) {
