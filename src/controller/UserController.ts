@@ -289,7 +289,7 @@ export const getlogo=async(req:Request,res:Response)=>{
         })
        }
        return res.status(200).send({
-        message:"Link user fetch ",
+        message:"Link user fetch",
         logo:`${process.env.client_url}/`+linkuser.logo
     })
        
