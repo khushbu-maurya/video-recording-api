@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
         if (!fs.existsSync(filesDir)) {
             // if not create directory
                 fs.mkdirSync(filesDir);
-                cb(null, path.join(__dirname, '../public'));
+                cb(null, path.join(__dirname, '../public'));    
             }
             else{
                 cb(null, path.join(__dirname, '../public')); 

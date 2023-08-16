@@ -7,11 +7,18 @@ import swaggerApiDocs from "./swagger-api.json";
 import cors from "cors";
 import path from "path";
 import bodyParser from "body-parser";
+import https from 'https';
+import fs from 'fs';
 dotenv.config();
 const app = express();
 
 const port = process.env.PORT || 3002;
 const dburl = "mongodb+srv://khushbu:yQH2D98k1FLyN9Uq@cluster0.gnaux.mongodb.net/test"
+
+const sslcertificate=https.createServer({
+    key: fs.readFileSync('./security/key.pem'),
+    cert: fs.readFileSync('./security/cer.pem')
+},app)
 
 app.use(function (req, res, next) {
     // res.setHeader("Set-Cookie", "HttpOnly;Secure;SameSite=None");
@@ -55,7 +62,7 @@ mongoose.connect(dburl).then(() => {
 }).catch(err => {
     console.log("Database connection error", err)
 })
-app.listen(port, () => {
+sslcertificate.listen(port, () => {
     console.log(`Server Running on port ${port}`)
 })
 
