@@ -110,33 +110,41 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.GenerateLink = GenerateLink;
 const UploadFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b, _c;
-    //   console.log(req.params.id);
     try {
         if (!req.file) {
             return res.status(400).send({
-                message: "video not found !"
+                message: "Video not found!"
             });
         }
-        //   const CheckUser= await File.findById(req.params.id);
-        // console.log(req.file)
-        const FileUplodSucc = yield new FileUpload_1.default({
-            file: (_b = req.file) === null || _b === void 0 ? void 0 : _b.filename,
-            linkid: req.params.id,
-        }).save();
-        // console.log(FileUplodSucc)                   
-        if (!FileUplodSucc) {
-            return res.status(400).send({
-                message: "video Upload Error !"
-            });
+        const linkId = req.params.id;
+        // Find the existing files associated with the linkid
+        const existingFiles = yield FileUpload_1.default.findOne({ linkid: linkId })
+            .select('files')
+            .lean();
+        const newFile = req.file.filename;
+        if (existingFiles) {
+            // Update the files array by adding the new file
+            const updatedFiles = [...existingFiles.files, newFile];
+            // Update the files field in the document
+            yield FileUpload_1.default.updateOne({ linkid: linkId }, { files: updatedFiles });
+        }
+        else {
+            // Create a new document if it doesn't exist
+            yield new FileUpload_1.default({
+                files: [newFile],
+                linkid: linkId
+            }).save();
         }
         return res.status(200).send({
-            message: "video Upload Success !",
-            file: `${process.env.client_url}/${(_c = req.file) === null || _c === void 0 ? void 0 : _c.filename}`
+            message: "Video Upload Success!",
+            file: `${process.env.client_url}/${newFile}`
         });
     }
     catch (error) {
-        console.log("Error :UserController :Fileupload ", error);
+        console.log("Error: UserController: FileUpload", error);
+        return res.status(500).send({
+            message: "File upload error"
+        });
     }
 });
 exports.UploadFile = UploadFile;
@@ -213,7 +221,13 @@ const GetFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         _id: "$_id",
                         email: "$linkDetail.email",
                         file: {
-                            $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                            $map: {
+                                input: "$files",
+                                as: "fileName",
+                                in: {
+                                    $concat: [process.env.client_url, "/", "$$fileName"]
+                                }
+                            }
                         },
                         linkid: "$linkid",
                         title: "$linkDetail.title",
@@ -254,7 +268,13 @@ const GetFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         _id: "$_id",
                         email: "$linkDetail.email",
                         file: {
-                            $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                            $map: {
+                                input: "$files",
+                                as: "fileName",
+                                in: {
+                                    $concat: [process.env.client_url, "/", "$$fileName"]
+                                }
+                            }
                         },
                         linkid: "$linkid",
                         title: "$linkDetail.title",
@@ -300,12 +320,15 @@ const getlogo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             });
         }
         return res.status(200).send({
-            message: "Link user fetch ",
+            message: "Link user fetch",
             logo: `${process.env.client_url}/` + linkuser.logo
         });
     }
     catch (error) {
         console.log("Error:Usercontroller:getlogo", error);
+        return res.status(400).send({
+            message: "image  not found"
+        });
     }
 });
 exports.getlogo = getlogo;

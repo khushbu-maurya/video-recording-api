@@ -2,6 +2,6 @@ import { Type } from "typescript"
 
 export type IFileUpload={
     email:string,
-    file:string,
+    files:any,
     linkid:Type.ObjectId
 }

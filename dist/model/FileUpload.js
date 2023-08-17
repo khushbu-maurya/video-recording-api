@@ -26,10 +26,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const FileSchema = new mongoose_1.Schema({
     email: String,
-    file: String,
+    files: {
+        type: [String],
+        set: setFiles
+    },
     linkid: mongoose_1.default.Types.ObjectId
 }, {
     timestamps: true
 });
+function setFiles(files) {
+    if (Array.isArray(files)) {
+        return Array.from(new Set(files));
+    }
+    else {
+        return [files];
+    }
+}
 const File = (0, mongoose_1.model)("File", FileSchema);
 exports.default = File;

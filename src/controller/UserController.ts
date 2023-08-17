@@ -98,34 +98,49 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
     }
 }
 export const UploadFile = async (req: Request<any, any, IFileUpload>, res: Response) => {
-//   console.log(req.params.id);
     try {
         if (!req.file) {
             return res.status(400).send({
-                message: "video not found !"
-            })
+                message: "Video not found!"
+            });
         }
-        //   const CheckUser= await File.findById(req.params.id);
-        // console.log(req.file)
-        const FileUplodSucc = await new File({
-            file: req.file?.filename,
-            linkid: req.params.id,
-        }).save()
-        // console.log(FileUplodSucc)                   
-        if (!FileUplodSucc) {
-            return res.status(400).send({
-                message: "video Upload Error !"
-            })
+
+        const linkId = req.params.id;
+
+        // Find the existing files associated with the linkid
+        const existingFiles: any = await File.findOne({ linkid: linkId })
+            .select('files')
+            .lean();
+
+        const newFile = req.file.filename;
+
+        if (existingFiles) {
+            // Update the files array by adding the new file
+            const updatedFiles = [...existingFiles.files, newFile];
+
+            // Update the files field in the document
+            await File.updateOne({ linkid: linkId }, { files: updatedFiles });
+        } else {
+            // Create a new document if it doesn't exist
+            await new File({
+                files: [newFile],
+                linkid: linkId
+            }).save();
         }
+
         return res.status(200).send({
-            message: "video Upload Success !",
-            file: `${process.env.client_url}/${req.file?.filename}`
-        })
+            message: "Video Upload Success!",
+            file: `${process.env.client_url}/${newFile}`
+        });
 
     } catch (error) {
-        console.log("Error :UserController :Fileupload ", error)
+        console.log("Error: UserController: FileUpload", error);
+        return res.status(500).send({
+            message: "File upload error"
+        });
     }
-}
+};
+
 export const sendEmail = async (req: Request, res: Response) => {
     try {
         const admin = req.user;
@@ -202,8 +217,14 @@ export const GetFile = async (req: Request, res: Response) => {
                 $project: {
                     _id: "$_id",
                     email: "$linkDetail.email",
-                    file:  {
-                        $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                    file: {
+                        $map: {
+                            input: "$files",
+                            as: "fileName",
+                            in: {
+                              $concat: [process.env.client_url, "/", "$$fileName"]
+                            }
+                          }
                     },
                     linkid: "$linkid",
                     title: "$linkDetail.title",
@@ -244,7 +265,13 @@ export const GetFile = async (req: Request, res: Response) => {
                         _id: "$_id",
                         email: "$linkDetail.email",
                         file: {
-                            $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$file", "/"] }, -1] }]
+                            $map: {
+                                input: "$files",
+                                as: "fileName",
+                                in: {
+                                  $concat: [process.env.client_url, "/", "$$fileName"]
+                                }
+                              }
                         },
                         linkid: "$linkid",
                         title: "$linkDetail.title",
@@ -295,5 +322,8 @@ export const getlogo=async(req:Request,res:Response)=>{
        
        } catch (error) {
         console.log("Error:Usercontroller:getlogo",error);
+        return res.status(400).send({
+            message:"image  not found"
+        })
        }
 }
