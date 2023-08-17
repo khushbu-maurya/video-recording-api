@@ -234,6 +234,7 @@ const GetFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         logo: {
                             $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
                         },
+                        Invitelink: "$linkDetail.link",
                         createdAt: "$createdAt",
                         updatedAt: "$updatedAt",
                     }
@@ -281,6 +282,7 @@ const GetFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         logo: {
                             $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
                         },
+                        Invitelink: "$linkDetail.link",
                         createdAt: "$createdAt",
                         updatedAt: "$updatedAt",
                     }
