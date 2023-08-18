@@ -5,7 +5,7 @@ const FileSchema = new Schema<IFileUpload>({
    
     email: String,
     files: {
-        type: [String], 
+        type: [], 
         set: setFiles
     },
     linkid:mongoose.Types.ObjectId

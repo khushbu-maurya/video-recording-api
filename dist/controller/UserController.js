@@ -124,14 +124,14 @@ const UploadFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const newFile = req.file.filename;
         if (existingFiles) {
             // Update the files array by adding the new file
-            const updatedFiles = [...existingFiles.files, newFile];
+            const updatedFiles = [...existingFiles.files, { newFile, createAt: new Date().toISOString() }];
             // Update the files field in the document
             yield FileUpload_1.default.updateOne({ linkid: linkId }, { files: updatedFiles });
         }
         else {
             // Create a new document if it doesn't exist
             yield new FileUpload_1.default({
-                files: [newFile],
+                files: [{ newFile, createAt: new Date().toISOString() }],
                 linkid: linkId
             }).save();
         }
@@ -202,7 +202,7 @@ exports.sendEmail = sendEmail;
 const GetFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const linkid = (req.query.id);
-        //  console.log(  await File.find())
+        //  console.log(await File.find())
         if (linkid) {
             const AllFileData = ((yield FileUpload_1.default.aggregate([{ $match: { linkid: new mongoose_1.default.Types.ObjectId(linkid) } },
                 {
@@ -220,14 +220,15 @@ const GetFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     $project: {
                         _id: "$_id",
                         email: "$linkDetail.email",
-                        file: {
+                        files: {
                             $map: {
                                 input: "$files",
-                                as: "fileName",
+                                as: "file",
                                 in: {
-                                    $concat: [process.env.client_url, "/", "$$fileName"]
+                                    file: { $concat: [process.env.client_url, "/", "$$file.newFile"] },
+                                    createAt: "$$file.createAt"
                                 }
-                            }
+                            },
                         },
                         linkid: "$linkid",
                         title: "$linkDetail.title",
@@ -268,12 +269,13 @@ const GetFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     $project: {
                         _id: "$_id",
                         email: "$linkDetail.email",
-                        file: {
+                        files: {
                             $map: {
                                 input: "$files",
-                                as: "fileName",
+                                as: "file",
                                 in: {
-                                    $concat: [process.env.client_url, "/", "$$fileName"]
+                                    file: { $concat: [process.env.client_url, "/", "$$file.newFile"] },
+                                    createAt: "$$file.createAt"
                                 }
                             }
                         },

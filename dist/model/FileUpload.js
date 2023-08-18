@@ -27,7 +27,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const FileSchema = new mongoose_1.Schema({
     email: String,
     files: {
-        type: [String],
+        type: [],
         set: setFiles
     },
     linkid: mongoose_1.default.Types.ObjectId

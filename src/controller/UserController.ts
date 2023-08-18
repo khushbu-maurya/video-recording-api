@@ -97,6 +97,7 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
         });
     }
 }
+
 export const UploadFile = async (req: Request<any, any, IFileUpload>, res: Response) => {
     try {
         if (!req.file) {
@@ -116,14 +117,14 @@ export const UploadFile = async (req: Request<any, any, IFileUpload>, res: Respo
 
         if (existingFiles) {
             // Update the files array by adding the new file
-            const updatedFiles = [...existingFiles.files, newFile];
+            const updatedFiles = [...existingFiles.files, {newFile,createAt:new Date().toISOString()}];
 
             // Update the files field in the document
             await File.updateOne({ linkid: linkId }, { files: updatedFiles });
         } else {
             // Create a new document if it doesn't exist
             await new File({
-                files: [newFile],
+                files: [{newFile,createAt:new Date().toISOString()}],
                 linkid: linkId
             }).save();
         }
@@ -140,6 +141,7 @@ export const UploadFile = async (req: Request<any, any, IFileUpload>, res: Respo
         });
     }
 };
+
 
 export const sendEmail = async (req: Request, res: Response) => {
     try {
@@ -199,7 +201,7 @@ export const GetFile = async (req: Request, res: Response) => {
 
     try {
         const linkid: any = (req.query.id);
-        //  console.log(  await File.find())
+        //  console.log(await File.find())
         if (linkid) {
             const AllFileData: any = ((await File.aggregate([{ $match: { linkid: new mongoose.Types.ObjectId(linkid) } },
             {
@@ -212,19 +214,22 @@ export const GetFile = async (req: Request, res: Response) => {
             },
             {
                 $unwind: "$linkDetail"
-            },
+            },  
             {
                 $project: {
                     _id: "$_id",
                     email: "$linkDetail.email",
-                    file: {
+                    files: {
+                      
                         $map: {
+
                             input: "$files",
-                            as: "fileName",
+                            as: "file",
                             in: {
-                              $concat: [process.env.client_url, "/", "$$fileName"]
+                                file: { $concat: [process.env.client_url, "/", "$$file.newFile"] },
+                                createAt:"$$file.createAt"
                             }
-                          }
+                          },
                     },
                     linkid: "$linkid",
                     title: "$linkDetail.title",
@@ -265,12 +270,13 @@ export const GetFile = async (req: Request, res: Response) => {
                     $project: {
                         _id: "$_id",
                         email: "$linkDetail.email",
-                        file: {
+                        files: {
                             $map: {
                                 input: "$files",
-                                as: "fileName",
+                                as: "file",
                                 in: {
-                                  $concat: [process.env.client_url, "/", "$$fileName"]
+                                    file: { $concat: [process.env.client_url, "/", "$$file.newFile"] },
+                                    createAt:"$$file.createAt"
                                 }
                               }
                         },
