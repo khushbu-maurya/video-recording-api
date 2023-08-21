@@ -76,7 +76,7 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const title = req.body.title;
         const link = req.body.link;
         const User = req.user;
-        const logo = (_a = req.file) === null || _a === void 0 ? void 0 : _a.filename;
+        const logo = ((_a = req.file) === null || _a === void 0 ? void 0 : _a.filename) || null;
         // console.log(User);
         if (!email && !title) {
             return res.status(400).send({
@@ -98,6 +98,7 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             title: LinkUser.title,
             link: GenerateLink,
             linkid: LinkUser._id,
+            logo: LinkUser.logo
         });
     }
     catch (error) {

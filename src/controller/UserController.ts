@@ -64,7 +64,7 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
         const title = req.body.title;
         const link = req.body.link;
         const User = req.user;
-        const logo = req.file?.filename;
+        const logo = req.file?.filename||null;
 
         // console.log(User);
         if (!email && !title) {
@@ -87,7 +87,7 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
             title: LinkUser.title,
             link: GenerateLink,
             linkid: LinkUser._id,
-
+            logo:LinkUser.logo
         });
     } catch (error) {
         console.log("Error :UserController :GenerateLink", error);
@@ -348,7 +348,7 @@ export const edittitle = async (req: Request, res: Response) => {
                 message: "Data update success !"
             })
         }
-
+        
     } catch (error) {
         console.log('Error:UserController,edittitle',error);
     }
