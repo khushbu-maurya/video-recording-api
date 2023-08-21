@@ -64,20 +64,20 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
         const title = req.body.title;
         const link = req.body.link;
         const User = req.user;
-        const logo=req.file?.filename;
-    
+        const logo = req.file?.filename;
+
         // console.log(User);
         if (!email && !title) {
             return res.status(400).send({
                 message: 'Field require !'
             })
         }
-        const LinkUser :any= await new Link({
+        const LinkUser: any = await new Link({
             email: email,
             title: title,
             link: link,
             admin: User,
-            logo:logo
+            logo: logo
         }).save();
         var GenerateLink: any = await `${link}:${LinkUser._id}`;
         const UpdateLink = await Link.findByIdAndUpdate(LinkUser._id, { link: GenerateLink }) // store ulr database
@@ -117,14 +117,14 @@ export const UploadFile = async (req: Request<any, any, IFileUpload>, res: Respo
 
         if (existingFiles) {
             // Update the files array by adding the new file
-            const updatedFiles = [...existingFiles.files, {newFile,createAt:new Date().toISOString()}];
+            const updatedFiles = [...existingFiles.files, { newFile, createAt: new Date().toISOString() }];
 
             // Update the files field in the document
             await File.updateOne({ linkid: linkId }, { files: updatedFiles });
         } else {
             // Create a new document if it doesn't exist
             await new File({
-                files: [{newFile,createAt:new Date().toISOString()}],
+                files: [{ newFile, createAt: new Date().toISOString() }],
                 linkid: linkId
             }).save();
         }
@@ -147,7 +147,7 @@ export const sendEmail = async (req: Request, res: Response) => {
     try {
         const admin = req.user;
         const id = req.params.id;
-        const linkUser:any = await Link.findById(id);
+        const linkUser: any = await Link.findById(id);
         const isValidEmail = validator.isEmail(linkUser?.email || '');
         if (!isValidEmail) {
             // console.log('Invalid email address:', linkUser?.email);
@@ -214,29 +214,29 @@ export const GetFile = async (req: Request, res: Response) => {
             },
             {
                 $unwind: "$linkDetail"
-            },  
+            },
             {
                 $project: {
                     _id: "$_id",
                     email: "$linkDetail.email",
                     files: {
-                      
+
                         $map: {
 
                             input: "$files",
                             as: "file",
                             in: {
                                 file: { $concat: [process.env.client_url, "/", "$$file.newFile"] },
-                                createAt:"$$file.createAt"
+                                createAt: "$$file.createAt"
                             }
-                          },
+                        },
                     },
                     linkid: "$linkid",
                     title: "$linkDetail.title",
-                    logo:{
+                    logo: {
                         $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
                     },
-                    Invitelink:"$linkDetail.link",
+                    Invitelink: "$linkDetail.link",
                     createdAt: "$createdAt",
                     updatedAt: "$updatedAt",
                 }
@@ -276,16 +276,16 @@ export const GetFile = async (req: Request, res: Response) => {
                                 as: "file",
                                 in: {
                                     file: { $concat: [process.env.client_url, "/", "$$file.newFile"] },
-                                    createAt:"$$file.createAt"
+                                    createAt: "$$file.createAt"
                                 }
-                              }
+                            }
                         },
                         linkid: "$linkid",
                         title: "$linkDetail.title",
-                        logo:{
+                        logo: {
                             $concat: [`${process.env.client_url}/`, { $arrayElemAt: [{ $split: ["$linkDetail.logo", "/"] }, -1] }]
                         },
-                        Invitelink:"$linkDetail.link",
+                        Invitelink: "$linkDetail.link",
                         createdAt: "$createdAt",
                         updatedAt: "$updatedAt",
                     }
@@ -314,24 +314,42 @@ export const GetFile = async (req: Request, res: Response) => {
 export const test = (req: Request, res: Response) => {
     res.send("test success");
 }
-export const getlogo=async(req:Request,res:Response)=>{
-    const linkid=req.params.id
-       try {
-       const linkuser= await Link.findById(linkid);
-       if(!linkuser){
-        return res.status(400).send({
-            message:"User Not Found"
+export const getlogo = async (req: Request, res: Response) => {
+    const linkid = req.params.id
+    try {
+        const linkuser = await Link.findById(linkid);
+        if (!linkuser) {
+            return res.status(400).send({
+                message: "User Not Found"
+            })
+        }
+        return res.status(200).send({
+            message: "Link user fetch",
+            logo: `${process.env.client_url}/` + linkuser.logo
         })
-       }
-       return res.status(200).send({
-        message:"Link user fetch",
-        logo:`${process.env.client_url}/`+linkuser.logo
-    })
-       
-       } catch (error) {
-        console.log("Error:Usercontroller:getlogo",error);
+
+    } catch (error) {
+        console.log("Error:Usercontroller:getlogo", error);
         return res.status(400).send({
-            message:"image  not found"
+            message: "image  not found"
         })
-       }
+    }
+}
+export const edittitle = async (req: Request, res: Response) => {
+    try {
+        const linkid = req.params.id
+        const updatetitle = await Link.findByIdAndUpdate(linkid, { title: req.body.title, logo: req.file?.filename })
+        if (!updatetitle) {
+            return res.status(400).json({
+                message: "Cant update data !"
+            })
+        } else {
+            return res.status(200).json({
+                message: "Data update success !"
+            })
+        }
+
+    } catch (error) {
+        console.log('Error:UserController,edittitle',error);
+    }
 }

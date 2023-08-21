@@ -55,4 +55,5 @@ router.get("/getfile", UserController_1.GetFile);
 router.get("/sendemail/:id", auth_1.userAuth, UserController_1.sendEmail);
 router.get("/test", UserController_1.test);
 router.get('/logo/:id', auth_1.userAuth, UserController_1.getlogo);
+router.put('/edittitle/:id', upload.single("file"), UserController_1.edittitle);
 exports.default = router;

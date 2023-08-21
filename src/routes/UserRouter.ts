@@ -1,5 +1,5 @@
 import express from "express";
-import { UserReg ,UserLogin,GenerateLink,UploadFile,GetFile,sendEmail,test,getlogo} from "../controller/UserController";
+import { UserReg ,UserLogin,GenerateLink,UploadFile,GetFile,sendEmail,test,getlogo,edittitle} from "../controller/UserController";
 import { userAuth } from "../middleware/auth";
 import multer from "multer";
 import path from "path";
@@ -54,5 +54,6 @@ router.get("/getfile",GetFile);
 router.get("/sendemail/:id",userAuth,sendEmail);
 router.get("/test",test);
 router.get('/logo/:id',userAuth,getlogo);
+router.put('/edittitle/:id',upload.single("file"),edittitle)
 
 export default router;

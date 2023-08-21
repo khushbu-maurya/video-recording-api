@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getlogo = exports.test = exports.GetFile = exports.sendEmail = exports.UploadFile = exports.GenerateLink = exports.UserLogin = exports.UserReg = void 0;
+exports.edittitle = exports.getlogo = exports.test = exports.GetFile = exports.sendEmail = exports.UploadFile = exports.GenerateLink = exports.UserLogin = exports.UserReg = void 0;
 const UserModel_1 = __importDefault(require("../model/UserModel"));
 const jsonwebtoken_1 = require("jsonwebtoken");
 const FileUpload_1 = __importDefault(require("../model/FileUpload"));
@@ -336,3 +336,24 @@ const getlogo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getlogo = getlogo;
+const edittitle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    try {
+        const linkid = req.params.id;
+        const updatetitle = yield LinkModel_1.default.findByIdAndUpdate(linkid, { title: req.body.title, logo: (_b = req.file) === null || _b === void 0 ? void 0 : _b.filename });
+        if (!updatetitle) {
+            return res.status(400).json({
+                message: "Cant update data !"
+            });
+        }
+        else {
+            return res.status(200).json({
+                message: "Data update success !"
+            });
+        }
+    }
+    catch (error) {
+        console.log('Error:UserController,edittitle', error);
+    }
+});
+exports.edittitle = edittitle;
