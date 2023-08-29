@@ -64,9 +64,9 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
         const title = req.body.title;
         const link = req.body.link;
         const User = req.user;
-        const logo = req.file?.filename||null;
+        const logo = req.file?.filename || null;
+        const questions = JSON.parse(req.body.questions) || {};
 
-        // console.log(User);
         if (!email && !title) {
             return res.status(400).send({
                 message: 'Field require !'
@@ -77,7 +77,8 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
             title: title,
             link: link,
             admin: User,
-            logo: logo
+            logo: logo,
+            questions: questions
         }).save();
         var GenerateLink: any = await `${link}:${LinkUser._id}`;
         const UpdateLink = await Link.findByIdAndUpdate(LinkUser._id, { link: GenerateLink }) // store ulr database
@@ -87,7 +88,8 @@ export const GenerateLink = async (req: Request<any, any, IGenerateLink>, res: R
             title: LinkUser.title,
             link: GenerateLink,
             linkid: LinkUser._id,
-            logo:LinkUser.logo
+            logo: LinkUser.logo,
+            questions: LinkUser.questions
         });
     } catch (error) {
         console.log("Error :UserController :GenerateLink", error);

@@ -29,7 +29,10 @@ const LinkSchema = new mongoose_1.Schema({
     title: String,
     link: String,
     logo: String,
-    user: mongoose_1.default.Types.ObjectId
+    user: mongoose_1.default.Types.ObjectId,
+    questions: {
+        type: Object
+    }
 }, {
     timestamps: true
 });

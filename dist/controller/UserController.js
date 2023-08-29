@@ -77,7 +77,7 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const link = req.body.link;
         const User = req.user;
         const logo = ((_a = req.file) === null || _a === void 0 ? void 0 : _a.filename) || null;
-        // console.log(User);
+        const questions = JSON.parse(req.body.questions) || {};
         if (!email && !title) {
             return res.status(400).send({
                 message: 'Field require !'
@@ -88,7 +88,8 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             title: title,
             link: link,
             admin: User,
-            logo: logo
+            logo: logo,
+            questions: questions
         }).save();
         var GenerateLink = yield `${link}:${LinkUser._id}`;
         const UpdateLink = yield LinkModel_1.default.findByIdAndUpdate(LinkUser._id, { link: GenerateLink }); // store ulr database
@@ -98,7 +99,8 @@ const GenerateLink = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             title: LinkUser.title,
             link: GenerateLink,
             linkid: LinkUser._id,
-            logo: LinkUser.logo
+            logo: LinkUser.logo,
+            questions: LinkUser.questions
         });
     }
     catch (error) {

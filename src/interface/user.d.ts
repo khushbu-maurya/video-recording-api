@@ -7,5 +7,6 @@ export type IUserReg={
 export type IGenerateLink={
     email:string,
     title:string,
-    link:any
+    link:any,
+    questions:string
 }

@@ -5,7 +5,10 @@ const LinkSchema = new Schema({
     title:String,
     link:String,
     logo:String,
-    user:mongoose.Types.ObjectId
+    user:mongoose.Types.ObjectId,
+    questions: {
+        type: Object
+    }
 
 }, {
     timestamps: true
