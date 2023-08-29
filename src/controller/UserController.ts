@@ -128,7 +128,6 @@ export const UploadFile = async (req: Request<any, any, IFileUpload>, res: Respo
                 linkid: linkId
             }).save();
         }
-
         return res.status(200).send({
             message: "Video Upload Success!",
             file: `${process.env.client_url}/${newFile}`
@@ -317,17 +316,21 @@ export const test = (req: Request, res: Response) => {
 export const getlogo = async (req: Request, res: Response) => {
     const linkid = req.params.id
     try {
-        const linkuser = await Link.findById(linkid);
-        if (!linkuser) {
-            return res.status(400).send({
-                message: "User Not Found"
+        if (mongoose.Types.ObjectId.isValid(linkid)) {
+            const linkuser = await Link.findById(linkid);
+            if (!linkuser) {
+                return res.status(403).send({
+                    message: "User Not Found"
+                })
+            }
+            return res.status(200).send({
+                message: "Link user fetch",
+                logo: `${process.env.client_url}/` + linkuser.logo
             })
         }
-        return res.status(200).send({
-            message: "Link user fetch",
-            logo: `${process.env.client_url}/` + linkuser.logo
+        return res.status(400).send({
+            message: "Pass valid linkid"
         })
-
     } catch (error) {
         console.log("Error:Usercontroller:getlogo", error);
         return res.status(400).send({
@@ -348,7 +351,6 @@ export const edittitle = async (req: Request, res: Response) => {
                 message: "Data update success !"
             })
         }
-        
     } catch (error) {
         console.log('Error:UserController,edittitle',error);
     }

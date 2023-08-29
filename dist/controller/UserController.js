@@ -318,15 +318,20 @@ exports.test = test;
 const getlogo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const linkid = req.params.id;
     try {
-        const linkuser = yield LinkModel_1.default.findById(linkid);
-        if (!linkuser) {
-            return res.status(400).send({
-                message: "User Not Found"
+        if (mongoose_1.default.Types.ObjectId.isValid(linkid)) {
+            const linkuser = yield LinkModel_1.default.findById(linkid);
+            if (!linkuser) {
+                return res.status(403).send({
+                    message: "User Not Found"
+                });
+            }
+            return res.status(200).send({
+                message: "Link user fetch",
+                logo: `${process.env.client_url}/` + linkuser.logo
             });
         }
-        return res.status(200).send({
-            message: "Link user fetch",
-            logo: `${process.env.client_url}/` + linkuser.logo
+        return res.status(400).send({
+            message: "Pass valid linkid"
         });
     }
     catch (error) {
