@@ -329,7 +329,8 @@ const getlogo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
             return res.status(200).send({
                 message: "Link user fetch",
-                logo: `${process.env.client_url}/` + linkuser.logo
+                logo: `${process.env.client_url}/` + linkuser.logo,
+                questions: linkuser.questions
             });
         }
         return res.status(400).send({
